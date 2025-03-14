@@ -22,3 +22,19 @@ AsyncStorage → Saves game settings, frog stats, and progress.
 ✅ For Volume Control:
 npm install @react-native-community/slider
 Slider → Lets players adjust sound/music volume.
+
+Step 3:
+Open the Terminal
+
+Make sure to cd into lily pad new
+cd .\lily-pad-new\
+
+then do
+
+npm install
+
+to run the project do 
+
+npx expo start
+
+to stop the server do CTRL-C on the keyboard
