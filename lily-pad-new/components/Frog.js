@@ -3,14 +3,14 @@ import { Image, StyleSheet, TouchableWithoutFeedback } from 'react-native';
 import { Audio } from 'expo-av';
 import Animated, { useSharedValue, useAnimatedStyle, withTiming, Easing } from 'react-native-reanimated';
 
-const idleFrame = require('../assets/Frog1.png'); // Idle frog frame
-const jumpStartFrame = require('../assets/Frog2.png'); // Start jump frame
-const midAirFrame = require('../assets/Frog3.png'); // Mid-air frame
+const idleFrame = require('../assets/Frog1.png');
+const jumpStartFrame = require('../assets/Frog2.png');
+const midAirFrame = require('../assets/Frog3.png');
 
-const FROG_SIZE = 120;
-const LILY_PAD_SIZE = 200;
+const Frog = ({ lilyPads, floatValue, volume, onLand, pondWidth, pondHeight }) => {
+  const PAD_SIZE = Math.min(pondWidth, pondHeight) * 0.2;
+  const FROG_SIZE = PAD_SIZE * 0.7;
 
-const Frog = ({ lilyPads, floatValue, volume }) => {
   const [frame, setFrame] = useState(idleFrame);
   const [position, setPosition] = useState(lilyPads[0]);
   const [isFlipped, setIsFlipped] = useState(false);
@@ -18,14 +18,17 @@ const Frog = ({ lilyPads, floatValue, volume }) => {
   const [canJump, setCanJump] = useState(true);
   const [jumpSounds, setJumpSounds] = useState([]);
 
-  const animatedTop = useSharedValue(position.top);
-  const animatedLeft = useSharedValue(position.left);
+  const animatedTop = useSharedValue(pondHeight * position.topPct + PAD_SIZE / 2 - FROG_SIZE / 2);
+  const animatedLeft = useSharedValue(pondWidth * position.leftPct + PAD_SIZE / 2 - FROG_SIZE / 2);
 
-  // 🔥 Ensure frog lands centered on lily pad
-  const getCenteredPosition = (pad) => ({
-    top: pad.top + (LILY_PAD_SIZE / 2) - (FROG_SIZE / 2),
-    left: pad.left + (LILY_PAD_SIZE / 2) - (FROG_SIZE / 2),
-  });
+  // ✅ Recalculate frog position on window/pond resize
+  useEffect(() => {
+    const newTop = pondHeight * position.topPct + PAD_SIZE / 2 - FROG_SIZE / 2;
+    const newLeft = pondWidth * position.leftPct + PAD_SIZE / 2 - FROG_SIZE / 2;
+
+    animatedTop.value = withTiming(newTop, { duration: 200 });
+    animatedLeft.value = withTiming(newLeft, { duration: 200 });
+  }, [pondWidth, pondHeight, position]);
 
   useEffect(() => {
     const loadSounds = async () => {
@@ -33,7 +36,6 @@ const Frog = ({ lilyPads, floatValue, volume }) => {
       const sound2 = await Audio.Sound.createAsync(require('../assets/jump2.mp3'));
       setJumpSounds([sound1.sound, sound2.sound]);
     };
-
     loadSounds();
 
     return () => {
@@ -50,48 +52,44 @@ const Frog = ({ lilyPads, floatValue, volume }) => {
   };
 
   const jump = async () => {
-    if (!canJump || isJumping) return; // 🔥 Prevent multiple jumps at once
+    if (!canJump || isJumping) return;
+
     setIsJumping(true);
-    setCanJump(false); // 🔥 Disable jumping temporarily
-
+    setCanJump(false);
     setFrame(jumpStartFrame);
-    await playRandomJumpSound(); // 🔥 Play jump sound
+    await playRandomJumpSound();
 
-    const possiblePads = lilyPads.filter(pad => pad !== position);
-    if (possiblePads.length === 0) {
-      setIsJumping(false);
-      setCanJump(true);
+    const options = lilyPads.filter(p => p !== position);
+    const next = options[Math.floor(Math.random() * options.length)];
+
+    const targetTop = pondHeight * next.topPct + PAD_SIZE / 2 - FROG_SIZE / 2;
+    const targetLeft = pondWidth * next.leftPct + PAD_SIZE / 2 - FROG_SIZE / 2;
+
+    const dx = targetLeft - animatedLeft.value;
+    const dy = targetTop - animatedTop.value;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    const duration = Math.min(1000, 500 + dist * 0.5);
+
+    setIsFlipped(next.leftPct < position.leftPct);
+
+    setTimeout(() => setFrame(midAirFrame), duration / 3);
+    setTimeout(() => setFrame(jumpStartFrame), (2 * duration) / 3);
+
+    animatedTop.value = withTiming(targetTop, { duration, easing: Easing.out(Easing.ease) });
+    animatedLeft.value = withTiming(targetLeft, { duration, easing: Easing.out(Easing.ease) }, () => {
       setFrame(idleFrame);
-      return;
-    }
-
-    const newPosition = possiblePads[Math.floor(Math.random() * possiblePads.length)];
-    const centeredPosition = getCenteredPosition(newPosition);
-
-    const dx = centeredPosition.left - animatedLeft.value;
-    const dy = centeredPosition.top - animatedTop.value;
-    const distance = Math.sqrt(dx * dx + dy * dy);
-    const speed = Math.min(1000, 500 + distance * 0.5);
-
-    setIsFlipped(newPosition.left < position.left);
-    
-    // 🔥 Smoothly transition through frames during jump
-    setTimeout(() => setFrame(midAirFrame), speed / 3); // Mid-air phase
-    setTimeout(() => setFrame(jumpStartFrame), (2 * speed) / 3); // Transition back to start frame
-
-    animatedTop.value = withTiming(centeredPosition.top, { duration: speed, easing: Easing.out(Easing.ease) });
-    animatedLeft.value = withTiming(centeredPosition.left, { duration: speed, easing: Easing.out(Easing.ease) }, () => {
+      setPosition(next);
       setIsJumping(false);
-      setFrame(idleFrame);
-      setPosition(newPosition);
-      setTimeout(() => setCanJump(true), 2000); // 🔥 2-second cooldown
+      setTimeout(() => setCanJump(true), 1000);
+      onLand(next);
     });
   };
 
-  // 🔥 Sync frog floating with lily pad
   const animatedStyle = useAnimatedStyle(() => ({
     top: animatedTop.value + floatValue.value,
     left: animatedLeft.value,
+    width: FROG_SIZE,
+    height: FROG_SIZE,
   }));
 
   return (
@@ -108,8 +106,8 @@ const styles = StyleSheet.create({
     position: 'absolute',
   },
   image: {
-    width: FROG_SIZE,
-    height: FROG_SIZE,
+    width: '100%',
+    height: '100%',
     resizeMode: 'contain',
   },
   flipped: {

@@ -1,25 +1,33 @@
 import React, { useState, useEffect } from 'react';
-import { View, ImageBackground, StyleSheet, TouchableOpacity, Text, Dimensions } from 'react-native';
+import { View, ImageBackground, StyleSheet, TouchableOpacity, Text, useWindowDimensions } from 'react-native';
 import { Audio } from 'expo-av';
 import Slider from '@react-native-community/slider';
 import LilyPad from './LilyPad';
 import Frog from './Frog';
 import Animated, { useSharedValue, withRepeat, withSequence, withTiming, Easing } from 'react-native-reanimated';
 
-const { width, height } = Dimensions.get("window");
+const pondBounds = {
+  top: 0.33,
+  left: 0.08,
+  width: 0.85,
+  height: 0.5,
+};
 
-// 🟢 Dynamically adjust lily pad positions to fit within the background
-const lilyPadPositions = [
-  { top: height * 0.50, left: width * 0.3 },
-  { top: height * 0.55, left: width * 0.5 },
-  { top: height * 0.60, left: width * 0.65 },
-  { top: height * 0.65, left: width * 0.4 },
-  { top: height * 0.7, left: width * 0.6 },
-  { top: height * 0.75, left: width * 0.3 },
-  { top: height * 0.8, left: width * 0.5 },
+const lilyPadRelativePositions = [
+  { topPct: 0.6, leftPct: 0.3 },
+  { topPct: 0.7, leftPct: 0.4 },
+  { topPct: 0.8, leftPct: 0.6 },
+  { topPct: 0.85, leftPct: 0.25 },
 ];
 
 const Background = () => {
+  const { width, height } = useWindowDimensions();
+  const [bouncePad, setBouncePad] = useState(null);
+  const [isVolumeOpen, setIsVolumeOpen] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const [bgMusic, setBgMusic] = useState(null);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+
   const idleFloat = useSharedValue(0);
   idleFloat.value = withRepeat(
     withSequence(
@@ -30,16 +38,13 @@ const Background = () => {
     true
   );
 
-  const [bouncePad, setBouncePad] = useState(null);
-  const [isVolumeOpen, setIsVolumeOpen] = useState(false);
-  const [volume, setVolume] = useState(1);
-  const [bgMusic, setBgMusic] = useState(null);
-  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const pondX = width * pondBounds.left;
+  const pondY = height * pondBounds.top;
+  const pondWidth = width * pondBounds.width;
+  const pondHeight = height * pondBounds.height;
 
-  // 🔥 Load Background Music but Do Not Play Immediately
   useEffect(() => {
     let music;
-
     const setupMusic = async () => {
       try {
         await Audio.setAudioModeAsync({
@@ -60,15 +65,11 @@ const Background = () => {
     };
 
     setupMusic();
-
     return () => {
-      if (music) {
-        music.unloadAsync();
-      }
+      if (music) music.unloadAsync();
     };
   }, []);
 
-  // 🔥 Function to Start Music on User Interaction
   const startMusic = async () => {
     if (bgMusic && !isMusicPlaying) {
       await bgMusic.playAsync();
@@ -77,7 +78,6 @@ const Background = () => {
     }
   };
 
-  // 🔥 Adjust Background Music Volume in Real-Time
   useEffect(() => {
     if (bgMusic) {
       bgMusic.setVolumeAsync(volume);
@@ -90,19 +90,22 @@ const Background = () => {
   };
 
   return (
-    <ImageBackground source={require('../assets/frogBack.png')} style={styles.background}>
-      {/* 🔊 Volume Button (Top Right) */}
+    <ImageBackground
+      source={require('../assets/frogBack.png')}
+      style={[styles.background, { width, height }]}
+    >
+      {/* Top Right Volume Button */}
       <TouchableOpacity
         style={styles.volumeButton}
         onPress={() => {
           setIsVolumeOpen(!isVolumeOpen);
-          startMusic(); // Start music on button click
+          startMusic();
         }}
       >
         <Text style={styles.volumeText}>{isMusicPlaying ? '🔊' : '🎵'}</Text>
       </TouchableOpacity>
 
-      {/* 🎚️ Volume Slider */}
+      {/* Volume Slider */}
       {isVolumeOpen && (
         <View style={styles.volumeContainer}>
           <Text style={styles.volumeLabel}>Volume</Text>
@@ -116,13 +119,35 @@ const Background = () => {
         </View>
       )}
 
-      {/* Lily Pads - Now correctly positioned inside the pond */}
-      {lilyPadPositions.map((pos, index) => (
-        <LilyPad key={index} top={pos.top} left={pos.left} floatValue={idleFloat} bounceTrigger={bouncePad?.top === pos.top && bouncePad?.left === pos.left} />
-      ))}
+      {/* Pond Container like a div */}
+      <View style={[styles.pondContainer, {
+        top: pondY,
+        left: pondX,
+        width: pondWidth,
+        height: pondHeight,
+      }]}>
+        {/* Lily Pads */}
+        {lilyPadRelativePositions.map((pad, index) => (
+          <LilyPad
+            key={index}
+            topPct={pad.topPct}
+            leftPct={pad.leftPct}
+            floatValue={idleFloat}
+            pondWidth={pondWidth}
+            pondHeight={pondHeight}
+          />
+        ))}
 
-      {/* Frog */}
-      <Frog lilyPads={lilyPadPositions} floatValue={idleFloat} onLand={handleFrogLanding} volume={volume} />
+        {/* Frog */}
+        <Frog
+          lilyPads={lilyPadRelativePositions}
+          floatValue={idleFloat}
+          volume={volume}
+          onLand={handleFrogLanding}
+          pondWidth={pondWidth}
+          pondHeight={pondHeight}
+        />
+      </View>
     </ImageBackground>
   );
 };
@@ -130,10 +155,10 @@ const Background = () => {
 const styles = StyleSheet.create({
   background: {
     flex: 1,
-    width: "100%",
-    height: "100%",
     resizeMode: "cover",
-    justifyContent: "center",
+  },
+  pondContainer: {
+    position: 'absolute',
   },
   volumeButton: {
     position: "absolute",
