@@ -1,17 +1,5 @@
-import React from 'react';
-import { View, StyleSheet } from 'react-native';
-import Background from '@/components/Background'; 
+import { registerRootComponent } from 'expo';
+import App from './App';
 
-export default function Index() {
-  return (
-    <View style={styles.container}>
-      <Background />
-    </View>
-  );
-}
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-  },
-});
+// This tells Expo to use your App component as the entry point
+registerRootComponent(App);
