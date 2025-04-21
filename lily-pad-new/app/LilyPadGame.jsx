@@ -5,6 +5,7 @@ import { LilyPad } from './LilyPad';
 import { FlyManager } from './FlyManager';
 import { SettingsMenu } from './SettingsMenu';
 import { OutfitMenu } from './OutfitMenu';
+import {SaveP, SaveF, GetKeys} from './back/backend';
 
 export const LilyPadGame = () => {
   // Game state
@@ -18,10 +19,22 @@ export const LilyPadGame = () => {
   const [frogColor, setFrogColor] = useState(() => {
     return localStorage.getItem('frogColor') || 'green';
   }); // Initialize from localStorage
+
+  useEffect(() => { //setting all prev states
+    const key = async() => {
+      let keys = await GetKeys(); //getting array of keys
+      setCurrentPadIndex(keys[0]); //setting position
+      setScore(keys[1]) //setting score
+    }
+    key(); //calling key function
+  },[])
+
   // Handle frog color change
   const handleFrogColorChange = (color) => {
     setFrogColor(color);
   };
+
+
   // Handle window resize
   useEffect(() => {
     const handleResize = () => {
@@ -132,12 +145,16 @@ export const LilyPadGame = () => {
       
       // Update the current pad index (this will move the frog)
       setCurrentPadIndex(index);
+      SaveP(index); //saving new pad index
+
     }
+    
   };
 
   // Handle fly being caught
   const handleFlyCaught = () => {
     setScore(score + 1);
+    SaveF(score); //saving flies caught
   };
 
   return (
