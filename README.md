@@ -1,40 +1,12 @@
-# Lily-Pad
-Our low-stim game for COMP380
+# React + Vite
 
-# The Dependencies to install
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-🛠 Step 2: Install Dependencies
-Now install the required libraries:
+Currently, two official plugins are available:
 
-✅ For Animations:
-npm install react-native-reanimated react-native-gesture-handler
-react-native-reanimated → Helps with smooth 2D animations.
-react-native-gesture-handler → Adds touch controls like dragging.
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-✅ For Sound and Music:
-npm install expo-av
-expo-av → Plays sound effects and background music.
+## Expanding the ESLint configuration
 
-✅ For Data Persistence (Saving Game Progress):
-npm install @react-native-async-storage/async-storage
-AsyncStorage → Saves game settings, frog stats, and progress.
-
-✅ For Volume Control:
-npm install @react-native-community/slider
-Slider → Lets players adjust sound/music volume.
-
-Step 3:
-Open the Terminal
-
-Make sure to cd into lily pad new
-cd .\lily-pad-new\
-
-then do
-
-npm install
-
-to run the project do 
-
-npx expo start
-
-to stop the server do CTRL-C on the keyboard
+If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
