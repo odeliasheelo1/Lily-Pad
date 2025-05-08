@@ -1,6 +1,6 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from './App' // ✅ Corrected // Import the new App component
+import {App} from './App' // ✅ Corrected // Import the new App component
 // Add CSS to ensure menu visibility and proper styling
 const addGlobalStyles = () => {
   const style = document.createElement('style');

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Notification } from 'Notification';
+import { Notification } from './Notification';
 // This component now primarily handles the button/trigger logic if not embedded.
 // The color selection itself happens in the OutfitModal.
 export const OutfitMenu = ({ onSelectColor, isEmbedded = false, onOpenModal }) => {

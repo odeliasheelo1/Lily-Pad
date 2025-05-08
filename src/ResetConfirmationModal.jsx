@@ -8,7 +8,7 @@ export const ResetConfirmationModal = ({ isOpen, onClose, onConfirm }) => {
     position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(0, 0, 0, 0.7)', display: 'flex', justifyContent: 'center', alignItems: 'center', zIndex: 1100, // Ensure it's above the main menu
   };
   const contentStyle = {
-    backgroundColor: 'white', padding: '35px 45px', borderRadius: '8px', boxShadow: '0 6px 20px rgba(0, 0, 0, 0.25)', minWidth: '350px', maxWidth: '90%', textAlign: 'center', position: 'relative', fontFamily: "'Arial', sans-serif",
+    backgroundColor: '#D2B48C', padding: '25px 35px', borderRadius: '8px', boxShadow: '0 6px 20px rgba(0, 0, 0, 0.25)', minWidth: '300px', maxWidth: '80%', textAlign: 'center', position: 'relative', fontFamily: "'Arial', sans-serif",
   };
    const titleStyle = {
     fontWeight: '600', fontSize: '1.3rem', marginBottom: '15px', color: '#d32f2f', // Warning red color

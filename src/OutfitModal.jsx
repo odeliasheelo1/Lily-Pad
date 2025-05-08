@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-// Accept ownedColors and ownedItems props, and onSelectHat handler
-export const OutfitModal = ({ isOpen, onClose, onSelectColor, ownedColors = {}, ownedItems = {}, onSelectHat }) => {
+// Accept ownedItems props (which includes colors), and onSelectHat handler
+export const OutfitModal = ({ isOpen, onClose, onSelectColor, ownedItems = {}, onSelectHat }) => {
   const [selectedColor, setSelectedColor] = useState(() => {
     return localStorage.getItem('frogColor') || 'green';
   });
@@ -24,8 +24,12 @@ export const OutfitModal = ({ isOpen, onClose, onSelectColor, ownedColors = {}, 
   // Determine which hat is currently equipped
   const equippedHat = Object.keys(ownedItems).find(key => key.startsWith('hat_') && ownedItems[key] === 'equipped');
   const isNoHatSelected = !equippedHat;
-  const isBasicHatSelected = equippedHat === 'hat_placeholder';
+  // const isBasicHatSelected = equippedHat === 'hat_placeholder'; // REMOVED
   const isCowboyHatSelected = equippedHat === 'hat_cowboy';
+  const isStrawberryHatSelected = equippedHat === 'hat_strawberry';
+  const isLAHatSelected = equippedHat === 'hat_la';
+  const isChefHatSelected = equippedHat === 'hat_chef';
+  const isCrownHatSelected = equippedHat === 'hat_crown';
   if (!isOpen) return null;
   return (
     // Modal Overlay
@@ -43,238 +47,444 @@ export const OutfitModal = ({ isOpen, onClose, onSelectColor, ownedColors = {}, 
     }}>
       {/* Modal Content */}
       <div style={{
-        backgroundColor: 'white',
-        padding: '30px 40px',
-        borderRadius: '8px', // Match main menu panel
-        boxShadow: '0 6px 20px rgba(0, 0, 0, 0.2)', // Slightly stronger shadow for modal
-        minWidth: '300px', // Wider modal
+        backgroundColor: '#D2B48C', // Tan color consistent with StoreModal
+        padding: '20px', // Standardized padding
+        borderRadius: '12px', // Match StoreModal border radius
+        boxShadow: '0 6px 20px rgba(0, 0, 0, 0.2)', // Match StoreModal shadow
+        width: 'clamp(350px, 90vw, 600px)', // Match StoreModal width clamping
+        maxHeight: '85vh', // Match StoreModal max height
+        overflowY: 'auto', // Add scroll for overflow
         position: 'relative',
-        fontFamily: "'Arial', sans-serif", // Consistent font
+        fontFamily: "'Arial', sans-serif",
       }}>
         {/* Close Button */}
         <button onClick={onClose} style={{
-          position: 'absolute',
-          top: '15px', // Adjust position
-          right: '15px',
+position: 'absolute',
+          top: '10px', // Adjusted position
+          right: '10px', // Adjusted position
           background: 'none',
           border: 'none',
-          fontSize: '1.8rem', // Slightly larger close button
+          fontSize: '1.5rem', // Reduced close button size
           cursor: 'pointer',
-          color: '#aaa', // Even lighter color
+          color: '#888', 
           lineHeight: 1,
           padding: '0', // Remove padding for cleaner look
           transition: 'color 0.2s ease', // Smooth color transition
         }}
-         onMouseEnter={(e) => e.target.style.color = '#555'} // Darker on hover
-         onMouseLeave={(e) => e.target.style.color = '#aaa'}
+         onMouseEnter={(e) => e.target.style.color = '#444'} // Darker on hover
+         onMouseLeave={(e) => e.target.style.color = '#888'}
         >
           &times; {/* Unicode 'X' */}
         </button>
         {/* Actual Color Selection UI */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}> {/* Reduced gap */}
-          <div className="color-option-title" style={{
-            textAlign: 'center',
-            fontWeight: '600', // Slightly less bold
-            fontSize: '1.2rem', // Larger title
-            marginBottom: 20, // Increased margin
-            color: '#333' // Darker text color
-          }}>
-            Choose Frog Color
-          </div>
-          
-          {/* Green option */}
-          <div
-            className={`color-option ${selectedColor === 'green' ? 'selected' : ''}`}
-            // Always allow selecting green
-            onClick={() => handleColorSelect('green')} 
-            style={{
-              cursor: 'pointer',
-              display: 'flex',
-              alignItems: 'center',
-              gap: 15, // Increased gap
-              padding: '12px 18px', // Adjusted padding
-              borderRadius: 6, // Match other elements
-              backgroundColor: selectedColor === 'green' ? 'rgba(76, 175, 80, 0.15)' : 'transparent', // More subtle background
-              border: selectedColor === 'green' ? '2px solid #4CAF50' : '2px solid #eee', // Use light grey border when not selected
-              transition: 'background-color 0.2s, border-color 0.2s, transform 0.1s ease', // Smooth transition + transform
-            }}
-             onMouseEnter={(e) => {
-                 if (selectedColor !== 'green') {
-                     e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.03)';
-                     e.currentTarget.style.borderColor = '#ccc'; // Darker border on hover
-                 }
-             }}
-             onMouseLeave={(e) => {
-                 if (selectedColor !== 'green') {
-                     e.currentTarget.style.backgroundColor = 'transparent';
-                     e.currentTarget.style.borderColor = '#eee'; // Reset border
-                 }
-             }}
-             onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'} // Press effect
-             onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            <img
-              src="https://play.rosebud.ai/assets/Frog1.png?kssR"
-              alt="Green Frog"
-              style={{ width: 45, height: 45 }} // Slightly smaller image
-            />
-            <span style={{ color: '#333', fontWeight: '500' }}>Green</span> {/* Darker text */}
-          </div>
-          {/* Red option */}
-          <div
-            className={`color-option ${selectedColor === 'red' ? 'selected' : ''}`}
-            // Only allow selecting if owned
-            onClick={() => ownedColors.color_red && handleColorSelect('red')}
-            style={{
-              cursor: ownedColors.color_red ? 'pointer' : 'not-allowed', // Change cursor if not owned
-              opacity: ownedColors.color_red ? 1 : 0.5, // Dim if not owned
-              display: 'flex',
-              alignItems: 'center',
-              gap: 15,
-              padding: '12px 18px',
-              borderRadius: 6,
-              backgroundColor: selectedColor === 'red' ? 'rgba(244, 67, 54, 0.15)' : 'transparent',
-              border: selectedColor === 'red' ? '2px solid #F44336' : '2px solid #eee',
-              transition: 'background-color 0.2s, border-color 0.2s, transform 0.1s ease',
-            }}
-             onMouseEnter={(e) => {
-                 if (selectedColor !== 'red') {
-                     e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.03)';
-                     e.currentTarget.style.borderColor = '#ccc';
-                 }
-             }}
-             onMouseLeave={(e) => {
-                 if (selectedColor !== 'red') {
-                     e.currentTarget.style.backgroundColor = 'transparent';
-                     e.currentTarget.style.borderColor = '#eee';
-                 }
-             }}
-            onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
-            onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            <img
-              src="https://play.rosebud.ai/assets/Red Frog 1.PNG?9ocr"
-              alt="Red Frog"
-              style={{ width: 45, height: 45 }}
-            />
-            <span style={{ color: '#333', fontWeight: '500' }}>Red</span>
-          </div>
-          {/* Yellow option */}
-          <div
-            className={`color-option ${selectedColor === 'yellow' ? 'selected' : ''}`}
-            // Only allow selecting if owned
-            onClick={() => ownedColors.color_yellow && handleColorSelect('yellow')}
-            style={{
-              cursor: ownedColors.color_yellow ? 'pointer' : 'not-allowed', // Change cursor if not owned
-              opacity: ownedColors.color_yellow ? 1 : 0.5, // Dim if not owned
-              display: 'flex',
-              alignItems: 'center',
-              gap: 15,
-              padding: '12px 18px',
-              borderRadius: 6,
-              backgroundColor: selectedColor === 'yellow' ? 'rgba(255, 193, 7, 0.15)' : 'transparent',
-              border: selectedColor === 'yellow' ? '2px solid #FFC107' : '2px solid #eee',
-              transition: 'background-color 0.2s, border-color 0.2s, transform 0.1s ease',
-            }}
-             onMouseEnter={(e) => {
-                 if (selectedColor !== 'yellow') {
-                     e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.03)';
-                     e.currentTarget.style.borderColor = '#ccc';
-                 }
-             }}
-             onMouseLeave={(e) => {
-                 if (selectedColor !== 'yellow') {
-                     e.currentTarget.style.backgroundColor = 'transparent';
-                     e.currentTarget.style.borderColor = '#eee';
-                 }
-             }}
-            onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
-            onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            <img
-              src="https://play.rosebud.ai/assets/Yellow Frog 1.png?OXP4"
-              alt="Yellow Frog"
-              style={{ width: 45, height: 45 }}
-            />
-            <span style={{ color: '#333', fontWeight: '500' }}>Yellow</span>
+<div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}> {/* Increased main gap */}
+          {/* Color Selection Section */}
+          <div>
+            <div style={{
+              textAlign: 'center',
+              fontWeight: 'bold', // Bolder title
+              fontSize: '1.3rem', // Larger title font
+              marginBottom: '15px', // Increased margin
+              color: '#4a2e1a' // Darker brown, like store title
+            }}>
+              Choose Frog Color
+            </div>
+            {/* Grid container for color options */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', // Wider cards, responsive
+              gap: '15px', // Increased gap
+              justifyItems: 'stretch', // Stretch items to fill grid cells
+            }}>
+              {/* Green option */}
+              <div
+                className={`color-option ${selectedColor === 'green' ? 'selected' : ''}`}
+                onClick={() => handleColorSelect('green')}
+                style={{
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '12px', // Increased padding
+                  borderRadius: '8px', // Consistent with store cards
+                  backgroundColor: selectedColor === 'green' ? '#C19A6B' : '#F5F5DC', // Darker selected tan, light tan unselected
+                  border: selectedColor === 'green' ? '2px solid #8B4513' : '1px solid #e0e0e0', // Sienna border for selected, light gray otherwise
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s',
+                  boxShadow: selectedColor === 'green' ? '0 2px 5px rgba(0,0,0,0.15)' : 'none',
+                  textAlign: 'center',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                  if (selectedColor !== 'green') e.currentTarget.style.backgroundColor = '#FAF0E6';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = selectedColor === 'green' ? '0 2px 5px rgba(0,0,0,0.15)' : 'none';
+                  if (selectedColor !== 'green') e.currentTarget.style.backgroundColor = '#F5F5DC';
+                }}
+                onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.97)'}
+                onMouseUp={(e) => e.currentTarget.style.transform = 'translateY(-2px)'} // Return to hover state
+              >
+                <img
+                  src="https://play.rosebud.ai/assets/Frog1.png?kssR"
+                  alt="Green Frog"
+                  style={{ width: 50, height: 50, objectFit: 'contain', marginBottom: '8px' }} // Larger image
+                />
+                <span style={{ color: '#444', fontWeight: '600', fontSize: '0.9rem' }}>Green</span> {/* Adjusted text style */}
+              </div>
+              {/* Red option */}
+              <div
+                className={`color-option ${selectedColor === 'red' ? 'selected' : ''}`}
+                onClick={() => ownedItems.color_red && handleColorSelect('red')}
+                style={{
+                  cursor: ownedItems.color_red ? 'pointer' : 'not-allowed',
+                  opacity: ownedItems.color_red ? 1 : 0.6,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  backgroundColor: selectedColor === 'red' ? '#C19A6B' : '#F5F5DC',
+                  border: selectedColor === 'red' ? '2px solid #8B4513' : '1px solid #e0e0e0',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s',
+                  boxShadow: selectedColor === 'red' ? '0 2px 5px rgba(0,0,0,0.15)' : 'none',
+                  textAlign: 'center',
+                }}
+                onMouseEnter={(e) => {
+                  if (ownedItems.color_red) {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                    if (selectedColor !== 'red') e.currentTarget.style.backgroundColor = '#FAF0E6';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (ownedItems.color_red) {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = selectedColor === 'red' ? '0 2px 5px rgba(0,0,0,0.15)' : 'none';
+                    if (selectedColor !== 'red') e.currentTarget.style.backgroundColor = '#F5F5DC';
+                  }
+                }}
+                onMouseDown={(e) => ownedItems.color_red && (e.currentTarget.style.transform = 'scale(0.97)')}
+                onMouseUp={(e) => ownedItems.color_red && (e.currentTarget.style.transform = 'translateY(-2px)')}
+              >
+                <img
+                  src="https://play.rosebud.ai/assets/Red Frog 1.PNG?9ocr"
+                  alt="Red Frog"
+                  style={{ width: 50, height: 50, objectFit: 'contain', marginBottom: '8px' }}
+                />
+                <span style={{ color: '#444', fontWeight: '600', fontSize: '0.9rem' }}>Red {ownedItems.color_red ? '' : '(Locked)'}</span>
+              </div>
+              {/* Yellow option */}
+              <div
+                className={`color-option ${selectedColor === 'yellow' ? 'selected' : ''}`}
+                onClick={() => ownedItems.color_yellow && handleColorSelect('yellow')}
+                style={{
+                  cursor: ownedItems.color_yellow ? 'pointer' : 'not-allowed',
+                  opacity: ownedItems.color_yellow ? 1 : 0.6,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  backgroundColor: selectedColor === 'yellow' ? '#C19A6B' : '#F5F5DC',
+                  border: selectedColor === 'yellow' ? '2px solid #8B4513' : '1px solid #e0e0e0',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s',
+                  boxShadow: selectedColor === 'yellow' ? '0 2px 5px rgba(0,0,0,0.15)' : 'none',
+                  textAlign: 'center',
+                }}
+                 onMouseEnter={(e) => {
+                  if (ownedItems.color_yellow) {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                    if (selectedColor !== 'yellow') e.currentTarget.style.backgroundColor = '#FAF0E6';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (ownedItems.color_yellow) {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = selectedColor === 'yellow' ? '0 2px 5px rgba(0,0,0,0.15)' : 'none';
+                    if (selectedColor !== 'yellow') e.currentTarget.style.backgroundColor = '#F5F5DC';
+                  }
+                }}
+                onMouseDown={(e) => ownedItems.color_yellow && (e.currentTarget.style.transform = 'scale(0.97)')}
+                onMouseUp={(e) => ownedItems.color_yellow && (e.currentTarget.style.transform = 'translateY(-2px)')}
+              >
+                <img
+                  src="https://play.rosebud.ai/assets/Yellow Frog 1.png?OXP4"
+                  alt="Yellow Frog"
+                  style={{ width: 50, height: 50, objectFit: 'contain', marginBottom: '8px' }}
+                />
+                <span style={{ color: '#444', fontWeight: '600', fontSize: '0.9rem' }}>Yellow {ownedItems.color_yellow ? '' : '(Locked)'}</span>
+              </div>
+            </div> {/* End grid container for color options */}
           </div>
           {/* Hat Selection Section */}
-          <div className="hat-options" style={{ borderTop: '1px solid #eee', paddingTop: '20px', marginTop: '10px' }}>
-             <div className="hat-option-title" style={{
-                textAlign: 'center', fontWeight: '600', fontSize: '1.2rem', marginBottom: 20, color: '#333'
-             }}>Choose Hat</div>
-            {/* Hat options using calculated variables */}
-            {/* No Hat option */}
-            <div
+          <div>
+            <div style={{
+              textAlign: 'center',
+              fontWeight: 'bold', // Bolder title
+              fontSize: '1.3rem', // Larger title font
+              marginBottom: '15px', // Increased margin
+              color: '#4a2e1a', // Darker brown, like store title
+              borderTop: '1px solid #c8b7a6', // Separator line
+              paddingTop: '20px', // Space above title after separator
+              marginTop: '20px', // Space below color options
+            }}>
+              Choose Hat
+            </div>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(100px, 1fr))', // Wider cards, responsive
+              gap: '15px', // Increased gap
+              justifyItems: 'stretch', // Stretch items to fill grid cells
+            }}>
+              {/* No Hat option */}
+              <div
                 className={`hat-option ${isNoHatSelected ? 'selected' : ''}`}
                 onClick={() => handleHatSelect(null)} // Pass null for no hat
                 style={{
-                    cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 15, padding: '12px 18px', borderRadius: 6,
-                    backgroundColor: isNoHatSelected ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
-                    border: isNoHatSelected ? '2px solid #ccc' : '2px solid #eee',
-                    transition: 'background-color 0.2s, border-color 0.2s, transform 0.1s ease',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  backgroundColor: isNoHatSelected ? '#C19A6B' : '#F5F5DC',
+                  border: isNoHatSelected ? '2px solid #8B4513' : '1px solid #e0e0e0',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s',
+                  boxShadow: isNoHatSelected ? '0 2px 5px rgba(0,0,0,0.15)' : 'none',
+                  textAlign: 'center',
                 }}
-                // Add hover/press effects similar to color options
-                 onMouseEnter={(e) => { if (!isNoHatSelected) { e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.03)'; e.currentTarget.style.borderColor = '#ccc'; } }}
-                 onMouseLeave={(e) => { if (!isNoHatSelected) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = '#eee'; } }}
-                 onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.98)'}
-                 onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
-            >
-               {/* Placeholder icon for 'no hat' */}
-               <div style={{ width: 45, height: 45, border: '1px dashed #ccc', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#aaa' }}>🚫</div>
-               <span style={{ color: '#333', fontWeight: '500' }}>No Hat</span>
-            </div>
-            {/* Basic Hat option */}
-            <div
-               className={`hat-option ${isBasicHatSelected ? 'selected' : ''}`}
-               onClick={() => ownedItems?.hat_placeholder && handleHatSelect('hat_placeholder')} // Only allow select if owned
-               style={{
-                   cursor: ownedItems?.hat_placeholder ? 'pointer' : 'not-allowed',
-                   opacity: ownedItems?.hat_placeholder ? 1 : 0.5,
-                   display: 'flex', alignItems: 'center', gap: 15, padding: '12px 18px', borderRadius: 6, marginTop: '10px',
-                   backgroundColor: isBasicHatSelected ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
-                   border: isBasicHatSelected ? '2px solid #ccc' : '2px solid #eee',
-                   transition: 'background-color 0.2s, border-color 0.2s, transform 0.1s ease',
-               }}
-               // Add hover/press effects similar to color options
-                 onMouseEnter={(e) => { if (ownedItems?.hat_placeholder && !isBasicHatSelected) { e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.03)'; e.currentTarget.style.borderColor = '#ccc'; } }}
-                 onMouseLeave={(e) => { if (ownedItems?.hat_placeholder && !isBasicHatSelected) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = '#eee'; } }}
-                 onMouseDown={(e) => ownedItems?.hat_placeholder && (e.currentTarget.style.transform = 'scale(0.98)')}
-                 onMouseUp={(e) => ownedItems?.hat_placeholder && (e.currentTarget.style.transform = 'scale(1)')}
-             >
+                onMouseEnter={(e) => { 
+                  e.currentTarget.style.transform = 'translateY(-2px)';
+                  e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                  if (!isNoHatSelected) e.currentTarget.style.backgroundColor = '#FAF0E6';
+                }}
+                onMouseLeave={(e) => { 
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = isNoHatSelected ? '0 2px 5px rgba(0,0,0,0.15)' : 'none';
+                  if (!isNoHatSelected) e.currentTarget.style.backgroundColor = '#F5F5DC';
+                }}
+                onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.97)'}
+                onMouseUp={(e) => e.currentTarget.style.transform = 'translateY(-2px)'}
+              >
+                <div style={{ width: 50, height: 50, border: '2px dashed #b0a090', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '24px', marginBottom: '8px' }}>🚫</div>
+                <span style={{ color: '#444', fontWeight: '600', fontSize: '0.9rem' }}>No Hat</span>
+              </div>
+              {/* Cowboy Hat option */}
+              <div
+                className={`hat-option ${isCowboyHatSelected ? 'selected' : ''}`}
+                onClick={() => ownedItems?.hat_cowboy && handleHatSelect('hat_cowboy')}
+                style={{
+                  cursor: ownedItems?.hat_cowboy ? 'pointer' : 'not-allowed',
+                  opacity: ownedItems?.hat_cowboy ? 1 : 0.6,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  backgroundColor: isCowboyHatSelected ? '#C19A6B' : '#F5F5DC',
+                  border: isCowboyHatSelected ? '2px solid #8B4513' : '1px solid #e0e0e0',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s',
+                  boxShadow: isCowboyHatSelected ? '0 2px 5px rgba(0,0,0,0.15)' : 'none',
+                  textAlign: 'center',
+                }}
+                 onMouseEnter={(e) => { 
+                   if(ownedItems?.hat_cowboy) {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                    if (!isCowboyHatSelected) e.currentTarget.style.backgroundColor = '#FAF0E6';
+                   }
+                }}
+                onMouseLeave={(e) => { 
+                  if(ownedItems?.hat_cowboy) {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = isCowboyHatSelected ? '0 2px 5px rgba(0,0,0,0.15)' : 'none';
+                    if (!isCowboyHatSelected) e.currentTarget.style.backgroundColor = '#F5F5DC';
+                  }
+                }}
+                onMouseDown={(e) => ownedItems?.hat_cowboy && (e.currentTarget.style.transform = 'scale(0.97)')}
+                onMouseUp={(e) => ownedItems?.hat_cowboy && (e.currentTarget.style.transform = 'translateY(-2px)')}
+              >
                 <img
-                   src="https://play.rosebud.ai/assets/8 bit hat.png?oXIp" // Use the actual 8-bit hat image
-                   alt="Basic Hat"
-                   style={{ width: 45, height: 45, objectFit: 'contain' }}
+                  src="https://play.rosebud.ai/assets/Cowboy Hat.png?KP7E"
+                  alt="Cowboy Hat"
+                  style={{ width: 50, height: 50, objectFit: 'contain', marginBottom: '8px' }}
                 />
-                <span style={{ color: '#333', fontWeight: '500' }}>Basic Hat {ownedItems?.hat_placeholder ? '' : '(Locked)'}</span>
-            </div>
-            {/* Cowboy Hat option */}
-            <div
-               className={`hat-option ${isCowboyHatSelected ? 'selected' : ''}`}
-               onClick={() => ownedItems?.hat_cowboy && handleHatSelect('hat_cowboy')} // Only allow select if owned
-               style={{
-                   cursor: ownedItems?.hat_cowboy ? 'pointer' : 'not-allowed',
-                   opacity: ownedItems?.hat_cowboy ? 1 : 0.5,
-                   display: 'flex', alignItems: 'center', gap: 15, padding: '12px 18px', borderRadius: 6, marginTop: '10px',
-                   backgroundColor: isCowboyHatSelected ? 'rgba(0, 0, 0, 0.05)' : 'transparent',
-                   border: isCowboyHatSelected ? '2px solid #ccc' : '2px solid #eee',
-                   transition: 'background-color 0.2s, border-color 0.2s, transform 0.1s ease',
-               }}
-                 onMouseEnter={(e) => { if (ownedItems?.hat_cowboy && !isCowboyHatSelected) { e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.03)'; e.currentTarget.style.borderColor = '#ccc'; } }}
-                 onMouseLeave={(e) => { if (ownedItems?.hat_cowboy && !isCowboyHatSelected) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.borderColor = '#eee'; } }}
-                 onMouseDown={(e) => ownedItems?.hat_cowboy && (e.currentTarget.style.transform = 'scale(0.98)')}
-                 onMouseUp={(e) => ownedItems?.hat_cowboy && (e.currentTarget.style.transform = 'scale(1)')}
-             >
+                <span style={{ color: '#444', fontWeight: '600', fontSize: '0.9rem' }}>Cowboy Hat {ownedItems?.hat_cowboy ? '' : '(Locked)'}</span>
+              </div>
+              {/* Strawberry Hat option */}
+              <div
+                className={`hat-option ${isStrawberryHatSelected ? 'selected' : ''}`}
+                onClick={() => ownedItems?.hat_strawberry && handleHatSelect('hat_strawberry')}
+                style={{
+                  cursor: ownedItems?.hat_strawberry ? 'pointer' : 'not-allowed',
+                  opacity: ownedItems?.hat_strawberry ? 1 : 0.6,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  backgroundColor: isStrawberryHatSelected ? '#C19A6B' : '#F5F5DC',
+                  border: isStrawberryHatSelected ? '2px solid #8B4513' : '1px solid #e0e0e0',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s',
+                  boxShadow: isStrawberryHatSelected ? '0 2px 5px rgba(0,0,0,0.15)' : 'none',
+                  textAlign: 'center',
+                }}
+                 onMouseEnter={(e) => { 
+                   if(ownedItems?.hat_strawberry) {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                    if (!isStrawberryHatSelected) e.currentTarget.style.backgroundColor = '#FAF0E6';
+                   }
+                }}
+                onMouseLeave={(e) => { 
+                  if(ownedItems?.hat_strawberry) {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = isStrawberryHatSelected ? '0 2px 5px rgba(0,0,0,0.15)' : 'none';
+                    if (!isStrawberryHatSelected) e.currentTarget.style.backgroundColor = '#F5F5DC';
+                  }
+                }}
+                onMouseDown={(e) => ownedItems?.hat_strawberry && (e.currentTarget.style.transform = 'scale(0.97)')}
+                onMouseUp={(e) => ownedItems?.hat_strawberry && (e.currentTarget.style.transform = 'translateY(-2px)')}
+              >
                 <img
-                   src="https://play.rosebud.ai/assets/Cowboy Hat.png?KP7E" // Use the Cowboy Hat image
-                   alt="Cowboy Hat"
-                   style={{ width: 45, height: 45, objectFit: 'contain' }}
+                  src="https://play.rosebud.ai/assets/Strawberry hat.PNG?pdTd"
+                  alt="Strawberry Hat"
+                  style={{ width: 50, height: 50, objectFit: 'contain', marginBottom: '8px' }}
                 />
-                <span style={{ color: '#333', fontWeight: '500' }}>Cowboy Hat {ownedItems?.hat_cowboy ? '' : '(Locked)'}</span>
-            </div>
-          </div> {/* End hat-options */}
-        </div> {/* End modal inner content */}
+                <span style={{ color: '#444', fontWeight: '600', fontSize: '0.9rem' }}>Strawberry Hat {ownedItems?.hat_strawberry ? '' : '(Locked)'}</span>
+              </div>
+              {/* LA Hat option */}
+                <div
+                className={`hat-option ${isLAHatSelected ? 'selected' : ''}`}
+                onClick={() => ownedItems?.hat_la && handleHatSelect('hat_la')}
+                style={{
+                  cursor: ownedItems?.hat_la ? 'pointer' : 'not-allowed',
+                  opacity: ownedItems?.hat_la ? 1 : 0.6,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  backgroundColor: isLAHatSelected ? '#C19A6B' : '#F5F5DC',
+                  border: isLAHatSelected ? '2px solid #8B4513' : '1px solid #e0e0e0',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s',
+                  boxShadow: isLAHatSelected ? '0 2px 5px rgba(0,0,0,0.15)' : 'none',
+                  textAlign: 'center',
+                }}
+                 onMouseEnter={(e) => { 
+                   if(ownedItems?.hat_la) {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                    if (!isLAHatSelected) e.currentTarget.style.backgroundColor = '#FAF0E6';
+                   }
+                }}
+                onMouseLeave={(e) => { 
+                  if(ownedItems?.hat_la) {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = isLAHatSelected ? '0 2px 5px rgba(0,0,0,0.15)' : 'none';
+                    if (!isLAHatSelected) e.currentTarget.style.backgroundColor = '#F5F5DC';
+                  }
+                }}
+                onMouseDown={(e) => ownedItems?.hat_la && (e.currentTarget.style.transform = 'scale(0.97)')}
+                onMouseUp={(e) => ownedItems?.hat_la && (e.currentTarget.style.transform = 'translateY(-2px)')}
+              >
+                <img
+                  src="https://play.rosebud.ai/assets/LA hat.PNG?mzqj"
+                  alt="LA Hat"
+                  style={{ width: 50, height: 50, objectFit: 'contain', marginBottom: '8px' }}
+                />
+                <span style={{ color: '#444', fontWeight: '600', fontSize: '0.9rem' }}>LA Hat {ownedItems?.hat_la ? '' : '(Locked)'}</span>
+              </div>
+              {/* Chef Hat option */}
+              <div
+                className={`hat-option ${isChefHatSelected ? 'selected' : ''}`}
+                onClick={() => ownedItems?.hat_chef && handleHatSelect('hat_chef')}
+                style={{
+                  cursor: ownedItems?.hat_chef ? 'pointer' : 'not-allowed',
+                  opacity: ownedItems?.hat_chef ? 1 : 0.6,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  backgroundColor: isChefHatSelected ? '#C19A6B' : '#F5F5DC',
+                  border: isChefHatSelected ? '2px solid #8B4513' : '1px solid #e0e0e0',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s',
+                  boxShadow: isChefHatSelected ? '0 2px 5px rgba(0,0,0,0.15)' : 'none',
+                  textAlign: 'center',
+                }}
+                 onMouseEnter={(e) => { 
+                   if(ownedItems?.hat_chef) {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                    if (!isChefHatSelected) e.currentTarget.style.backgroundColor = '#FAF0E6';
+                   }
+                }}
+                onMouseLeave={(e) => { 
+                  if(ownedItems?.hat_chef) {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = isChefHatSelected ? '0 2px 5px rgba(0,0,0,0.15)' : 'none';
+                    if (!isChefHatSelected) e.currentTarget.style.backgroundColor = '#F5F5DC';
+                  }
+                }}
+                onMouseDown={(e) => ownedItems?.hat_chef && (e.currentTarget.style.transform = 'scale(0.97)')}
+                onMouseUp={(e) => ownedItems?.hat_chef && (e.currentTarget.style.transform = 'translateY(-2px)')}
+              >
+                <img
+                  src="https://play.rosebud.ai/assets/Chef hat.PNG?fGDe"
+                  alt="Chef Hat"
+                  style={{ width: 50, height: 50, objectFit: 'contain', marginBottom: '8px' }}
+                />
+                <span style={{ color: '#444', fontWeight: '600', fontSize: '0.9rem' }}>Chef Hat {ownedItems?.hat_chef ? '' : '(Locked)'}</span>
+              </div>
+               {/* Crown Hat option */}
+              <div
+                className={`hat-option ${isCrownHatSelected ? 'selected' : ''}`}
+                onClick={() => ownedItems?.hat_crown && handleHatSelect('hat_crown')}
+                style={{
+                  cursor: ownedItems?.hat_crown ? 'pointer' : 'not-allowed',
+                  opacity: ownedItems?.hat_crown ? 1 : 0.6,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  backgroundColor: isCrownHatSelected ? '#C19A6B' : '#F5F5DC',
+                  border: isCrownHatSelected ? '2px solid #8B4513' : '1px solid #e0e0e0',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s',
+                  boxShadow: isCrownHatSelected ? '0 2px 5px rgba(0,0,0,0.15)' : 'none',
+                  textAlign: 'center',
+                }}
+                 onMouseEnter={(e) => { 
+                   if(ownedItems?.hat_crown) {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                    if (!isCrownHatSelected) e.currentTarget.style.backgroundColor = '#FAF0E6';
+                   }
+                }}
+                onMouseLeave={(e) => { 
+                  if(ownedItems?.hat_crown) {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = isCrownHatSelected ? '0 2px 5px rgba(0,0,0,0.15)' : 'none';
+                    if (!isCrownHatSelected) e.currentTarget.style.backgroundColor = '#F5F5DC';
+                  }
+                }}
+                onMouseDown={(e) => ownedItems?.hat_crown && (e.currentTarget.style.transform = 'scale(0.97)')}
+                onMouseUp={(e) => ownedItems?.hat_crown && (e.currentTarget.style.transform = 'translateY(-2px)')}
+              >
+                <img
+                  src="https://play.rosebud.ai/assets/CrownHat.PNG?9Z7Q"
+                  alt="Crown Hat"
+                  style={{ width: 50, height: 50, objectFit: 'contain', marginBottom: '8px' }}
+                />
+                <span style={{ color: '#444', fontWeight: '600', fontSize: '0.9rem' }}>Crown Hat {ownedItems?.hat_crown ? '' : '(Locked)'}</span>
+              </div>
+            </div> {/* End hat-options grid */}
+          </div> {/* End hat selection section */}
+        </div> {/* End modal inner content flex container */}
       </div> {/* End modal content div */}
     </div>
   );

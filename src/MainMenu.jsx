@@ -1,48 +1,86 @@
-import React, { useState } from 'react';
-import { SettingsMenu } from './SettingsMenu';
+import React, { useState, useEffect } from 'react';
 import { OutfitModal } from './OutfitModal';
 import { StoreModal } from './StoreModal';
-import { ResetConfirmationModal } from './ResetConfirmationModal'; // Import the reset modal
-// Pass score, ownedItems, purchase handler, hat selection handler, isMuted, onToggleMute down
+import { ResetConfirmationModal } from './ResetConfirmationModal';
+import { HelpModal } from './HelpModal';
+import { AboutModal } from './AboutModal';
+import HelpIcon from './assets/Question.png';
+import HelpDimIcon from './assets/QuestionDim.png';
+import AboutIcon from './assets/About.png';
+import AboutDimIcon from './assets/AboutDim.png';
+import ResetIcon from './assets/Reset.png';
+import ResetDimIcon from './assets/ResetDim.png';
+
 export const MainMenu = ({ onSelectColor, onSelectHat, score, ownedItems, onPurchase, isMuted, onToggleMute }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [buttonHovered, setButtonHovered] = useState(false);
   const [isOutfitModalOpen, setIsOutfitModalOpen] = useState(false);
-  const [isStoreModalOpen, setIsStoreModalOpen] = useState(false); // State for Store modal
-  const [isResetModalOpen, setIsResetModalOpen] = useState(false); // State for Reset modal
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
-  const openOutfitModal = () => {
-    setIsOutfitModalOpen(true);
-    // Optionally close the main menu when opening the modal
-    // setIsMenuOpen(false); 
-  };
-  const closeOutfitModal = () => {
-    setIsOutfitModalOpen(false);
-  };
-  // Removed extra closing brace here
-  const openStoreModal = () => {
-    setIsStoreModalOpen(true);
-  };
-  const closeStoreModal = () => {
-    setIsStoreModalOpen(false);
-  };
-  // Reset Modal Handlers
-  const openResetModal = () => {
-    setIsResetModalOpen(true);
-  };
-  const closeResetModal = () => {
-    setIsResetModalOpen(false);
-  };
+  const [isStoreModalOpen, setIsStoreModalOpen] = useState(false);
+  const [isResetModalOpen, setIsResetModalOpen] = useState(false);
+  const [isHelpModalOpen, setIsHelpModalOpen] = useState(false);
+  const [isAboutModalOpen, setIsAboutModalOpen] = useState(false);
+  const [soundHovered, setSoundHovered] = useState(false);
+  const [helpHovered, setHelpHovered] = useState(false);
+  const [aboutHovered, setAboutHovered] = useState(false);
+
+  useEffect(() => {
+    if (!isMenuOpen) {
+      setSoundHovered(false);
+      setHelpHovered(false);
+      setAboutHovered(false);
+    }
+  }, [isMenuOpen]);
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
+  const openOutfitModal = () => { setIsOutfitModalOpen(true); setIsMenuOpen(false); };
+  const closeOutfitModal = () => setIsOutfitModalOpen(false);
+  const openStoreModal = () => { setIsStoreModalOpen(true); setIsMenuOpen(false); };
+  const closeStoreModal = () => setIsStoreModalOpen(false);
+  const openResetModal = () => { setIsResetModalOpen(true); setIsMenuOpen(false); };
+  const closeResetModal = () => setIsResetModalOpen(false);
+  const openHelpModal = () => { setIsHelpModalOpen(true); setIsMenuOpen(false); };
+  const closeHelpModal = () => setIsHelpModalOpen(false);
+  const openAboutModal = () => { setIsAboutModalOpen(true); setIsMenuOpen(false); };
+  const closeAboutModal = () => setIsAboutModalOpen(false);
+
   const handleConfirmReset = () => {
-     // Clear relevant localStorage items
     localStorage.removeItem('froggyJumpsScore');
     localStorage.removeItem('froggyOwnedItems');
-    localStorage.removeItem('frogColor'); // Also reset selected color preference
-    // Reload the page to go back to the title screen and reset state
+    localStorage.removeItem('frogColor');
     window.location.reload();
   };
+
+  const ImageButton = ({ baseSrc, dimSrc, alt, onClick, width = '55%', title, externalHoverState, setExternalHoverState }) => {
+    const [isHovered, setIsHovered] = useState(false);
+    const hover = externalHoverState ?? isHovered;
+    const setHover = setExternalHoverState ?? setIsHovered;
+
+    return (
+      <div
+        style={{ textAlign: 'center', cursor: 'pointer' }}
+        onClick={onClick}
+        onMouseEnter={() => setHover(true)}
+        onMouseLeave={() => setHover(false)}
+        onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+        onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+      >
+        <img
+          src={hover ? dimSrc : baseSrc}
+          alt={alt}
+          style={{
+            width: width,
+            height: 'auto',
+            display: 'block',
+            margin: '0 auto 5px auto',
+            transition: 'transform 0.1s ease',
+            transform: hover ? 'scale(1.05)' : 'scale(1)'
+          }}
+        />
+        <h4 style={{ marginTop: 0, marginBottom: '5px', color: '#333', fontSize: '0.85rem', fontWeight: '600' }}>{title}</h4>
+      </div>
+    );
+  };
+
   return (
     <>
       {/* Main Menu Button */}
@@ -51,21 +89,21 @@ export const MainMenu = ({ onSelectColor, onSelectHat, score, ownedItems, onPurc
         onClick={toggleMenu}
         onMouseEnter={() => setButtonHovered(true)}
         onMouseLeave={() => setButtonHovered(false)}
-        style={{ 
+        style={{
           position: 'absolute',
-          top: 20, 
-          left: 20, 
-          zIndex: 110, // Ensure it's above other UI elements
-          cursor: 'pointer', 
-          width: 50, 
+          top: 20,
+          left: 20,
+          zIndex: 110,
+          cursor: 'pointer',
+          width: 50,
           height: 50,
           transition: 'transform 0.2s ease',
           transform: buttonHovered ? 'scale(1.1)' : 'scale(1)'
         }}
       >
-        <img 
-          src={buttonHovered 
-            ? "https://play.rosebud.ai/assets/Menu dim.png?Y6vR" 
+        <img
+          src={buttonHovered
+            ? "https://play.rosebud.ai/assets/Menu dim.png?Y6vR"
             : "https://play.rosebud.ai/assets/Menu.png?zr9C"}
           alt="Menu"
           style={{ width: '100%', height: '100%' }}
@@ -76,113 +114,79 @@ export const MainMenu = ({ onSelectColor, onSelectHat, score, ownedItems, onPurc
       {isMenuOpen && (
         <div className="main-menu-panel" style={{
           position: 'absolute',
-          top: 80, // Position below the button
+          top: 80,
           left: 20,
-          backgroundColor: '#ffffff', // Solid white background
-          borderRadius: 8, // Slightly smaller radius
-          padding: '25px', // Increased padding
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)', // Softer shadow
+          backgroundColor: '#D2B48C',
+          borderRadius: 15,
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
           zIndex: 105,
-          display: 'flex',
-          flexDirection: 'column',
-          gap: 20,
-          minWidth: 220, // Slightly wider
-          animation: 'menuAppear 0.3s ease-out forwards', // Use existing animation
-          fontFamily: "'Arial', sans-serif", // Consistent font
+          display: 'grid',
+          gridTemplateColumns: 'repeat(3, 1fr)',
+          gridTemplateRows: 'auto auto',
+          gap: '8px 6px',
+          width: 300,
+          height: 'auto',
+          padding: '30px 10px 10px 10px', // ✅ KEEP THIS
+          animation: 'menuAppear 0.3s ease-out forwards',
+          fontFamily: "'Arial', sans-serif",
         }}>
-          {/* Render actual menus, passing isEmbedded prop */}
-          <div className="menu-section" style={{ borderBottom: '1px solid #eee', paddingBottom: '15px' }}>
-            <h4 style={{ marginTop: 0, marginBottom: '15px', color: '#555' }}>Settings</h4>
-            {/* Pass isMuted and onToggleMute down to SettingsMenu */}
-            <SettingsMenu isEmbedded={true} isMuted={isMuted} onToggleMute={onToggleMute} />
-          </div>
-          <div className="menu-section">
-             <h4 style={{ marginTop: 0, marginBottom: '15px', color: '#555' }}>Outfit</h4>
-              {/* Button to open the Outfit Modal */}
-              <button
-                onClick={openOutfitModal}
-                className="menu-button" // Add class for potential global styling
-                style={{
-                  cursor: 'pointer',
-                  padding: '10px 18px', // Larger padding
-                  border: 'none', // Remove border
-                  borderRadius: '6px', // Match panel radius
-                  backgroundColor: '#4CAF50', // Green theme color
-                  color: 'white', // White text
-                  fontFamily: "'Arial', sans-serif",
-                  fontSize: '0.95rem', // Slightly larger font
-                  width: '100%', // Make button fill section width
-                  textAlign: 'center',
-                  transition: 'background-color 0.2s ease, transform 0.1s ease', // Smooth transitions
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.1)', // Subtle shadow
-                }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#45a049'} // Darker green on hover
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#4CAF50'}
-                onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'} // Press effect
-                onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
-              >
-                  Outfit
-              </button>
-          </div>
-           {/* Store Button */}
-          <div className="menu-section" style={{ borderTop: '1px solid #eee', paddingTop: '15px' }}>
-             <h4 style={{ marginTop: 0, marginBottom: '15px', color: '#555' }}>Store</h4>
-              <button
-                onClick={openStoreModal} // Open the Store Modal
-                className="menu-button"
-                style={{
-                  cursor: 'pointer', padding: '10px 18px', border: 'none', borderRadius: '6px', backgroundColor: '#2196F3', /* Blue theme color */ color: 'white', fontFamily: "'Arial', sans-serif", fontSize: '0.95rem', width: '100%', textAlign: 'center', transition: 'background-color 0.2s ease, transform 0.1s ease', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#1e88e5'} /* Darker blue */
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#2196F3'}
-                onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'}
-                onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
-              >
-                  Visit Store
-              </button>
-          </div>
-          {/* Reset Game Button */}
-          <div className="menu-section" style={{ borderTop: '1px solid #eee', paddingTop: '15px' }}>
-             <h4 style={{ marginTop: 0, marginBottom: '15px', color: '#555' }}>Reset</h4>
-              <button
-                onClick={openResetModal} // Open the reset confirmation modal
-                className="menu-button reset-button" // Add specific class
-                style={{
-                  cursor: 'pointer', padding: '10px 18px', border: 'none', borderRadius: '6px', backgroundColor: '#f44336', /* Red color for warning */ color: 'white', fontFamily: "'Arial', sans-serif", fontSize: '0.95rem', width: '100%', textAlign: 'center', transition: 'background-color 0.2s ease, transform 0.1s ease', boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                }}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#e53935'} /* Darker red */
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#f44336'}
-                onMouseDown={(e) => e.target.style.transform = 'scale(0.98)'}
-                onMouseUp={(e) => e.target.style.transform = 'scale(1)'}
-              >
-                  Reset Game
-              </button>
-          </div>
+          <ImageButton
+            baseSrc="https://play.rosebud.ai/assets/Accessories.PNG?AO97"
+            dimSrc="https://play.rosebud.ai/assets/Accessories dim.PNG?OVJh"
+            alt="Accessories"
+            onClick={openOutfitModal}
+            title="Accessories"
+          />
+          <ImageButton
+            baseSrc="https://play.rosebud.ai/assets/Shop.PNG?uXu9"
+            dimSrc="https://play.rosebud.ai/assets/Shop dim.PNG?y6xs"
+            alt="Store"
+            onClick={openStoreModal}
+            title="Store"
+          />
+          <ImageButton
+            baseSrc={isMuted ? "https://play.rosebud.ai/assets/sounddimmed.png?NpJ5" : "https://play.rosebud.ai/assets/sound.png?t4JR"}
+            dimSrc="https://play.rosebud.ai/assets/sounddimmed.png?NpJ5"
+            alt="Sound"
+            onClick={onToggleMute}
+            title={isMuted ? "Unmute" : "Mute"}
+            externalHoverState={soundHovered}
+            setExternalHoverState={setSoundHovered}
+          />
+          <ImageButton
+            baseSrc={HelpIcon}
+            dimSrc={HelpDimIcon}
+            alt="Help"
+            onClick={openHelpModal}
+            title="Help"
+            externalHoverState={helpHovered}
+            setExternalHoverState={setHelpHovered}
+          />
+          <ImageButton
+            baseSrc={AboutIcon}
+            dimSrc={AboutDimIcon}
+            alt="About"
+            onClick={openAboutModal}
+            title="About"
+            externalHoverState={aboutHovered}
+            setExternalHoverState={setAboutHovered}
+          />
+          <ImageButton
+            baseSrc={ResetIcon}
+            dimSrc={ResetDimIcon}
+            alt="Reset"
+            onClick={openResetModal}
+            title="Reset"
+          />
         </div>
       )}
-      {/* Render the Outfit Modal */}
-      <OutfitModal
-        isOpen={isOutfitModalOpen}
-        onClose={closeOutfitModal}
-        onSelectColor={onSelectColor}
-        onSelectHat={onSelectHat} // Pass hat selection handler
-        ownedColors={ownedItems} // Pass owned items for color filtering
-        ownedItems={ownedItems} // Pass owned items for hat filtering
-      />
-      {/* Render the Store Modal */}
-      <StoreModal
-        isOpen={isStoreModalOpen}
-        onClose={closeStoreModal}
-        score={score}
-        ownedItems={ownedItems}
-        onPurchase={onPurchase} // Pass the purchase handler
-      />
-       {/* Render the Reset Confirmation Modal */}
-      <ResetConfirmationModal
-        isOpen={isResetModalOpen}
-        onClose={closeResetModal}
-        onConfirm={handleConfirmReset}
-      />
+
+      {/* Modals */}
+      <OutfitModal isOpen={isOutfitModalOpen} onClose={closeOutfitModal} onSelectColor={onSelectColor} ownedItems={ownedItems} onSelectHat={onSelectHat} />
+      <StoreModal isOpen={isStoreModalOpen} onClose={closeStoreModal} score={score} ownedItems={ownedItems} onPurchase={onPurchase} />
+      <ResetConfirmationModal isOpen={isResetModalOpen} onClose={closeResetModal} onConfirm={handleConfirmReset} />
+      <HelpModal isOpen={isHelpModalOpen} onClose={closeHelpModal} />
+      <AboutModal isOpen={isAboutModalOpen} onClose={closeAboutModal} />
     </>
   );
 };

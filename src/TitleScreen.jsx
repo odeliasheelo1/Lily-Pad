@@ -1,36 +1,55 @@
 import React from 'react';
+import bgImage from './assets/LoadScreen1.png'; // Local image
 
 export const TitleScreen = ({ onStartGame }) => {
   return (
-    <div style={{
-      width: '100%',
-      height: '100%',
-      display: 'flex',
-      flexDirection: 'column',
-      justifyContent: 'center',
-      alignItems: 'center',
-      background: 'linear-gradient(to bottom, #87CEEB, #4682B4)', // Sky blue to steel blue gradient
-      fontFamily: '"Comic Sans MS", cursive, sans-serif', // Fun font
-      color: 'white',
-      textShadow: '2px 2px 4px rgba(0,0,0,0.5)',
-    }}>
-      <h1 style={{ fontSize: '4rem', marginBottom: '20px' }}>Froggy Jumps</h1>
-      <p style={{ fontSize: '1.5rem', marginBottom: '40px' }}>Help the frog catch flies!</p>
-      <button 
+    <div
+      style={{
+        width: '100vw',
+        height: '100vh',
+        backgroundImage: `url(${bgImage})`,
+        backgroundSize: 'contain', // Changed from 'contain'
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center', // ✅ Vertically center the button
+        position: 'relative',
+      }}
+    >
+      <button
         onClick={onStartGame}
         style={{
-          padding: '15px 30px',
-          fontSize: '1.8rem',
-          backgroundColor: '#32CD32', // Lime green
-          color: 'white',
-          border: 'none',
-          borderRadius: '10px',
+          padding: '12px 24px',
+          fontSize: '1.4rem',
+          backgroundColor: '#556B2F',
+          color: '#FFFFFF',
+          border: '2px solid #3B4B21',
+          borderRadius: '20px',
           cursor: 'pointer',
-          boxShadow: '3px 3px 5px rgba(0,0,0,0.4)',
-          transition: 'transform 0.2s ease, background-color 0.2s ease',
+          boxShadow: '2px 2px 4px rgba(0,0,0,0.4)',
+          transition: 'transform 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease',
+          fontWeight: 'bold',
+          fontFamily: '"Comic Sans MS", cursive, sans-serif',
         }}
-        onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-        onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
+        onMouseEnter={(e) => {
+          e.target.style.transform = 'scale(1.05)';
+          e.target.style.backgroundColor = '#6B8E23';
+          e.target.style.boxShadow = '3px 3px 5px rgba(0,0,0,0.5)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.transform = 'scale(1)';
+          e.target.style.backgroundColor = '#556B2F';
+          e.target.style.boxShadow = '2px 2px 4px rgba(0,0,0,0.4)';
+        }}
+        onMouseDown={(e) => {
+          e.target.style.transform = 'scale(0.98)';
+          e.target.style.boxShadow = '1px 1px 2px rgba(0,0,0,0.3)';
+        }}
+        onMouseUp={(e) => {
+          e.target.style.transform = 'scale(1.05)';
+          e.target.style.boxShadow = '3px 3px 5px rgba(0,0,0,0.5)';
+        }}
       >
         Start Game
       </button>

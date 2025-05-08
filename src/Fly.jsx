@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-// Accept gameWidth and gameHeight as props
-export const Fly = ({ id, x, y, type, frogPosition, onCaught, lilyPads, gameWidth, gameHeight }) => {
-  // Use initial x, y for position, relative coords calculated if needed later
+// Removed frogPosition and onCaught props for now
+export const Fly = ({ id, x, y, type, lilyPads, gameWidth, gameHeight }) => {
   const [position, setPosition] = useState({ x, y });
+  // Removed windowSize state and resize effect
   // Removed windowSize state and resize effect
   const [hovering, setHovering] = useState(true);
   const [currentFrame, setCurrentFrame] = useState(1);
@@ -101,29 +101,8 @@ export const Fly = ({ id, x, y, type, frogPosition, onCaught, lilyPads, gameWidt
     return () => clearInterval(frameInterval);
   }, [hovering]);
   
-  // Check for tongue collision
-  useEffect(() => {
-    // Check distance to frog
-    const checkFrogDistance = () => {
-      const dx = position.x - frogPosition.x;
-      const dy = position.y - frogPosition.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
-      
-      // If within catching range and frog has tongue-extending function
-      if (distance < 250 && window.frogExtendTongue && hovering) {
-        setHovering(false);
-        window.frogExtendTongue(position.x, position.y);
-        
-        // Let the frog "eat" the fly
-        setTimeout(() => {
-          onCaught(id);
-        }, 300);
-      }
-    };
-    
-    const interval = setInterval(checkFrogDistance, 100);
-    return () => clearInterval(interval);
-  }, [id, position, frogPosition, onCaught, hovering]);
+  // Removed the old distance check effect that relied on frogPosition/onCaught props
+  
   // Fly appearance - use fixed size for now
   const flySize = 35; // Fixed fly size
   // Determine if the game area is "small" based on its fixed dimensions

@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { TitleScreen } from './TitleScreen';
 import { LilyPadGame } from './LilyPadGame';
 
-
 export const App = () => {
   const [gameState, setGameState] = useState('title'); // 'title' or 'game'
 
@@ -33,5 +32,3 @@ return (
     </div>
   );
 };
-
-export default App;
