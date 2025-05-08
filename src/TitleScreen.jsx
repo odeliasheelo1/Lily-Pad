@@ -7,7 +7,7 @@ export const TitleScreen = ({ onStartGame }) => {
       style={{
         width: '100vw',
         height: '100vh',
-        backgroundImage: `url(${bgImage})`,
+        backgroundImage: 'url("https://play.rosebud.ai/assets/LoadScreen1.PNG?0sVz")', // Updated image
         backgroundSize: 'contain', // Changed from 'contain'
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
