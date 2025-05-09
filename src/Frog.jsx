@@ -28,6 +28,17 @@ export const Frog = ({ x, y, color, ownedItems, flies, onFlyCaught, gameOffset, 
   useEffect(() => {
     setCurrentImage(1); // Start with idle image
   }, []);
+  // Effect to reset animation states when color changes
+  useEffect(() => {
+    // Reset to idle state when color changes to avoid animation glitches
+    setFrogState('idle');
+    setCurrentImage(1);
+    setRotation(0);
+    setTongueState('idle');
+    setCurrentTongueLength(0);
+    setChargeLevel(0);
+    // If you have other animation-specific states, reset them here too
+  }, [validColor]); // Watch for changes in the validated color
   const tongueRetractionTime = 150; // ms for tongue to retract
   const tongueHeight = 8; // Height of the tongue div in pixels
   const frogRef = useRef(null); // Ref for the frog container div
@@ -320,7 +331,7 @@ useEffect(() => {
       // delete window.frogExtendTongue; // Remove the old global function
       delete window.triggerFrogJump;
     };
-  }, [x, y]); // Keep dependencies
+  }, []); // setFrogState is stable, so empty dependencies are fine.
   
   // Calculate tongue dimensions based on launch target and distance
   const calculateTongueStyle = () => {
@@ -588,109 +599,125 @@ transition: frogState === 'jumping'
         </div>
       )}
       {/* Conditionally render the hat based on equipped status */}
-      {ownedItems?.hat_placeholder === 'equipped' && ( // Check for 'equipped' status
-        <img
-          src="https://play.rosebud.ai/assets/8 bit hat.png?oXIp" // Use the 8-bit hat asset
-          alt="Hat"
-          style={{
-            position: 'absolute',
-            top: '7px', // Lowered the hat significantly to sit on the head
-            left: '27px', // Adjusted slightly left for better centering
-            width: '35px', // Made slightly smaller
-            height: 'auto',
-            zIndex: 21, // Ensure hat is above frog but below tongue tip if needed
-            // Rotation is added, parent container rotation still applies during jumps
-            transform: 'rotate(-5deg)', // Added a slight tilt
-            pointerEvents: 'none', // Make sure hat doesn't interfere with clicks
-            transition: 'top 0.1s ease-out, left 0.1s ease-out', // Smooth position changes slightly if needed
-          }}
-        />
-      )}
+      {ownedItems?.hat_placeholder === 'equipped' && (() => {
+        const baseStyle = { position: 'absolute', height: 'auto', zIndex: 21, pointerEvents: 'none' };
+        const colorSpecificStyles = {
+          green: { top: '7px', left: '27px', width: '35px', transform: 'rotate(-5deg)' },
+          red:   { top: '7px', left: '27px', width: '35px', transform: 'rotate(-5deg)' },
+          yellow:{ top: '5px', left: '25px', width: '35px', transform: 'rotate(-5deg)' }
+        };
+        const finalStyle = { ...baseStyle, ...(colorSpecificStyles[validColor] || colorSpecificStyles.green) };
+        return (
+          <img
+            src="https://play.rosebud.ai/assets/8 bit hat.png?oXIp"
+            alt="Hat"
+            style={finalStyle}
+          />
+        );
+      })()}
       {/* Conditionally render the Cowboy Hat */}
-      {ownedItems?.hat_cowboy === 'equipped' && (
-        <img
-          src="https://play.rosebud.ai/assets/Cowboy Hat.png?KP7E"
-          alt="Cowboy Hat"
-          style={{
-            position: 'absolute',
-            top: '-9px', // Adjust vertical position for Cowboy Hat
-            left: '10px', // Adjust horizontal position
-            width: '70px', // Adjust size
-            height: 'auto',
-            zIndex: 21,
-            transform: 'rotate(-8deg)', // Slight tilt
-            pointerEvents: 'none',
-          }}
-        />
-      )}
+      {ownedItems?.hat_cowboy === 'equipped' && (() => {
+        const baseStyle = { position: 'absolute', height: 'auto', zIndex: 21, pointerEvents: 'none' };
+        const colorSpecificStyles = {
+          green: { top: '5px', left: '5px', width: '90px', transform: 'rotate(-4deg)' },
+          red:   { top: '5px', left: '5px', width: '90px', transform: 'rotate(-4deg)' },
+          yellow:{ top: '5px', left: '5px', width: '90px', transform: 'rotate(-4deg)' }
+        };
+        const finalStyle = { ...baseStyle, ...(colorSpecificStyles[validColor] || colorSpecificStyles.green) };
+        return (
+          <img
+            src="https://play.rosebud.ai/assets/CowboyHat.PNG?jWEr"
+            alt="Cowboy Hat"
+            style={finalStyle}
+          />
+        );
+      })()}
       {/* Conditionally render the LA Hat */}
-      {ownedItems?.hat_la === 'equipped' && (
-        <img
-          src="https://play.rosebud.ai/assets/LA hat.PNG?mzqj"
-          alt="LA Hat"
-          style={{
-            position: 'absolute',
-            top: '10px', // Adjust vertical position for LA Hat
-            left: '10px', // Adjust horizontal position
-            width: '80px', // Adjust size
-            height: 'auto',
-            zIndex: 21,
-            transform: 'rotate(-5deg)', // Slight tilt
-            pointerEvents: 'none',
-          }}
-        />
-      )}
+      {ownedItems?.hat_la === 'equipped' && (() => {
+        const baseStyle = { position: 'absolute', height: 'auto', zIndex: 21, pointerEvents: 'none' };
+        const colorSpecificStyles = {
+          green: { top: '10px', left: '10px', width: '80px', transform: 'rotate(-5deg)' },
+          red:   { top: '10px', left: '10px', width: '80px', transform: 'rotate(-5deg)' },
+          yellow:{ top: '8px', left: '8px', width: '80px', transform: 'rotate(-5deg)' }
+        };
+        const finalStyle = { ...baseStyle, ...(colorSpecificStyles[validColor] || colorSpecificStyles.green) };
+        return (
+          <img
+            src="https://play.rosebud.ai/assets/LA hat.PNG?mzqj"
+            alt="LA Hat"
+            style={finalStyle}
+          />
+        );
+      })()}
       {/* Conditionally render the Strawberry Hat */}
-      {ownedItems?.hat_strawberry === 'equipped' && (
-        <img
-          src="https://play.rosebud.ai/assets/Strawberry hat.PNG?pdTd"
-          alt="Strawberry Hat"
-          style={{
-            position: 'absolute',
-            top: '4px', // Adjust vertical position for Strawberry Hat
-            left: '-1px', // Adjust horizontal position
-            width: '90px', // Adjust size
-            height: 'auto',
-            zIndex: 21,
-            transform: 'rotate(-2deg) scaleX(-1)', // Slight tilt and flip if needed for asset
-            pointerEvents: 'none',
-          }}
-        />
-      )}
+      {ownedItems?.hat_strawberry === 'equipped' && (() => {
+        const baseStyle = { position: 'absolute', height: 'auto', zIndex: 21, pointerEvents: 'none' };
+        const colorSpecificStyles = {
+          green: { top: '4px', left: '-1px', width: '90px', transform: 'rotate(-2deg) scaleX(-1)' },
+          red:   { top: '4px', left: '-1px', width: '90px', transform: 'rotate(-2deg) scaleX(-1)' },
+          yellow:{ top: '2px', left: '-3px', width: '90px', transform: 'rotate(-2deg) scaleX(-1)' }
+        };
+        const finalStyle = { ...baseStyle, ...(colorSpecificStyles[validColor] || colorSpecificStyles.green) };
+        return (
+          <img
+            src="https://play.rosebud.ai/assets/Strawberry hat.PNG?pdTd"
+            alt="Strawberry Hat"
+            style={finalStyle}
+          />
+        );
+      })()}
       {/* Conditionally render the Chef Hat */}
-      {ownedItems?.hat_chef === 'equipped' && (
-        <img
-          src="https://play.rosebud.ai/assets/Chef hat.PNG?fGDe"
-          alt="Chef Hat"
-          style={{
-            position: 'absolute',
-            top: '3px', // Adjusted vertical position for Chef Hat (higher up)
-            left: '6px', // Adjusted horizontal position
-            width: '90px', // Adjusted size
-            height: 'auto',
-            zIndex: 21,
-            transform: 'rotate(-2deg)', // Very slight tilt
-            pointerEvents: 'none',
-          }}
-        />
-      )}
+      {ownedItems?.hat_chef === 'equipped' && (() => {
+        const baseStyle = { position: 'absolute', height: 'auto', zIndex: 21, pointerEvents: 'none' };
+        const colorSpecificStyles = {
+          green: { top: '3px', left: '6px', width: '90px', transform: 'rotate(-2deg)' },
+          red:   { top: '3px', left: '6px', width: '90px', transform: 'rotate(-2deg)' },
+          yellow:{ top: '1px', left: '4px', width: '90px', transform: 'rotate(-2deg)' }
+        };
+        const finalStyle = { ...baseStyle, ...(colorSpecificStyles[validColor] || colorSpecificStyles.green) };
+        return (
+          <img
+            src="https://play.rosebud.ai/assets/Chef hat.PNG?fGDe"
+            alt="Chef Hat"
+            style={finalStyle}
+          />
+        );
+      })()}
       {/* Conditionally render the Crown Hat */}
-      {ownedItems?.hat_crown === 'equipped' && (
-        <img
-          src="https://play.rosebud.ai/assets/CrownHat.PNG?9Z7Q"
-          alt="Crown Hat"
-          style={{
-            position: 'absolute',
-            top: '3px', // Adjust vertical position for Crown Hat
-            left: '5px', // Adjust horizontal position
-            width: '90px', // Adjust size
-            height: 'auto',
-            zIndex: 21,
-            transform: 'rotate(-2deg)', // Slight tilt
-            pointerEvents: 'none',
-          }}
-        />
-      )}
+      {ownedItems?.hat_crown === 'equipped' && (() => {
+        const baseStyle = { position: 'absolute', height: 'auto', zIndex: 21, pointerEvents: 'none' };
+        const colorSpecificStyles = {
+          green: { top: '3px', left: '5px', width: '90px', transform: 'rotate(-2deg)' },
+          red:   { top: '3px', left: '5px', width: '90px', transform: 'rotate(-2deg)' },
+          yellow:{ top: '1px', left: '3px', width: '90px', transform: 'rotate(-2deg)' }
+        };
+        const finalStyle = { ...baseStyle, ...(colorSpecificStyles[validColor] || colorSpecificStyles.green) };
+        return (
+          <img
+            src="https://play.rosebud.ai/assets/CrownHat.PNG?9Z7Q"
+            alt="Crown Hat"
+            style={finalStyle}
+          />
+        );
+      })()}
+      {/* Conditionally render the Magic Hat */}
+      {ownedItems?.hat_magic === 'equipped' && (() => {
+        const baseStyle = { position: 'absolute', height: 'auto', zIndex: 21, pointerEvents: 'none' };
+        // Define specific styles for the Magic Hat for each frog color
+        const colorSpecificStyles = {
+          green: { top: '3px', left: '5px', width: '90px', transform: 'rotate(-3deg)' },
+          red:   { top: '3px', left: '5px', width: '90px', transform: 'rotate(-3deg)' },
+          yellow:{ top: '3px', left: '5px', width: '90px', transform: 'rotate(-3deg)' } 
+        };
+        const finalStyle = { ...baseStyle, ...(colorSpecificStyles[validColor] || colorSpecificStyles.green) };
+        return (
+          <img
+            src="https://play.rosebud.ai/assets/MagicHat.PNG?fJX9"
+            alt="Magic Hat"
+            style={finalStyle}
+          />
+        );
+      })()}
     {/* Charge Indicator Bar - Do not show if sleeping */}
       {tongueState === 'charging' && !isSleeping && (
           <div className="charge-bar-container" style={{

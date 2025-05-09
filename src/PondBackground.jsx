@@ -12,7 +12,7 @@ export const PondBackground = ({ width = '100%', height = '100%' }) => {
       height: height, // Use passed height
       backgroundImage: `url(${backgroundImage})`,
       // 'contain' might be better for fixed aspect ratio, 'cover' will crop
-      backgroundSize: '200%', // Increased size to 200%
+      backgroundSize: '120%', // Scaled down from 200%
       backgroundPosition: 'center 70%', // Shift background down
       zIndex: 0,
       opacity: 0.9, // Slightly less opaque

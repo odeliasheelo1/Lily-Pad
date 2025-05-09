@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 // Accept ownedItems props (which includes colors), and onSelectHat handler
 export const OutfitModal = ({ isOpen, onClose, onSelectColor, ownedItems = {}, onSelectHat }) => {
+  // Magic Hat ownership reverted to original state from ownedItems prop
+  // const ownedItems = { ...originalOwnedItems, hat_magic: 'owned' }; // This line is now removed/commented
   const [selectedColor, setSelectedColor] = useState(() => {
     return localStorage.getItem('frogColor') || 'green';
   });
@@ -30,6 +32,7 @@ export const OutfitModal = ({ isOpen, onClose, onSelectColor, ownedItems = {}, o
   const isLAHatSelected = equippedHat === 'hat_la';
   const isChefHatSelected = equippedHat === 'hat_chef';
   const isCrownHatSelected = equippedHat === 'hat_crown';
+  const isMagicHatSelected = equippedHat === 'hat_magic';
   if (!isOpen) return null;
   return (
     // Modal Overlay
@@ -308,7 +311,7 @@ position: 'absolute',
                 onMouseUp={(e) => ownedItems?.hat_cowboy && (e.currentTarget.style.transform = 'translateY(-2px)')}
               >
                 <img
-                  src="https://play.rosebud.ai/assets/Cowboy Hat.png?KP7E"
+                  src="https://play.rosebud.ai/assets/CowboyHat.PNG?jWEr"
                   alt="Cowboy Hat"
                   style={{ width: 50, height: 50, objectFit: 'contain', marginBottom: '8px' }}
                 />
@@ -481,6 +484,48 @@ position: 'absolute',
                   style={{ width: 50, height: 50, objectFit: 'contain', marginBottom: '8px' }}
                 />
                 <span style={{ color: '#444', fontWeight: '600', fontSize: '0.9rem' }}>Crown Hat {ownedItems?.hat_crown ? '' : '(Locked)'}</span>
+              </div>
+              {/* Magic Hat option */}
+              <div
+                className={`hat-option ${isMagicHatSelected ? 'selected' : ''}`}
+                onClick={() => ownedItems?.hat_magic && handleHatSelect('hat_magic')}
+                style={{
+                  cursor: ownedItems?.hat_magic ? 'pointer' : 'not-allowed',
+                  opacity: ownedItems?.hat_magic ? 1 : 0.6,
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  padding: '12px',
+                  borderRadius: '8px',
+                  backgroundColor: isMagicHatSelected ? '#C19A6B' : '#F5F5DC',
+                  border: isMagicHatSelected ? '2px solid #8B4513' : '1px solid #e0e0e0',
+                  transition: 'transform 0.2s ease, box-shadow 0.2s ease, background-color 0.2s',
+                  boxShadow: isMagicHatSelected ? '0 2px 5px rgba(0,0,0,0.15)' : 'none',
+                  textAlign: 'center',
+                }}
+                 onMouseEnter={(e) => { 
+                   if(ownedItems?.hat_magic) {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(0,0,0,0.1)';
+                    if (!isMagicHatSelected) e.currentTarget.style.backgroundColor = '#FAF0E6';
+                   }
+                }}
+                onMouseLeave={(e) => { 
+                  if(ownedItems?.hat_magic) {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = isMagicHatSelected ? '0 2px 5px rgba(0,0,0,0.15)' : 'none';
+                    if (!isMagicHatSelected) e.currentTarget.style.backgroundColor = '#F5F5DC';
+                  }
+                }}
+                onMouseDown={(e) => ownedItems?.hat_magic && (e.currentTarget.style.transform = 'scale(0.97)')}
+                onMouseUp={(e) => ownedItems?.hat_magic && (e.currentTarget.style.transform = 'translateY(-2px)')}
+              >
+                <img
+                  src="https://play.rosebud.ai/assets/MagicHat.PNG?fJX9"
+                  alt="Magic Hat"
+                  style={{ width: 50, height: 50, objectFit: 'contain', marginBottom: '8px' }}
+                />
+                <span style={{ color: '#444', fontWeight: '600', fontSize: '0.9rem' }}>Magic Hat {ownedItems?.hat_magic ? '' : '(Locked)'}</span>
               </div>
             </div> {/* End hat-options grid */}
           </div> {/* End hat selection section */}

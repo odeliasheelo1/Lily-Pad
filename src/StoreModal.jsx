@@ -9,13 +9,13 @@ const ITEM_COSTS = {
   hat_strawberry: 30, // Strawberry Hat
   hat_la: 35, // LA Hat
   hat_chef: 40, // Chef Hat
-  hat_crown: 60, // Crown Hat - premium!
-  trampoline_main: 75, // Trampoline cost
+  hat_crown: 30, // Crown Hat - premium!
+  hat_magic: 45, // Magic Hat
+  trampoline_main: 50, // Trampoline cost - TEMPORARILY 10
   // level_area2 cost removed
 };
 export const StoreModal = ({ isOpen, onClose, score, ownedItems = {}, onPurchase }) => {
   const [notification, setNotification] = useState('');
-
   const handlePurchaseAttempt = (itemId, cost) => {
     if (score >= cost) {
       if (ownedItems[itemId]) {
@@ -30,6 +30,7 @@ export const StoreModal = ({ isOpen, onClose, score, ownedItems = {}, onPurchase
         if (itemId === 'hat_la') friendlyName = 'LA Hat';
         if (itemId === 'hat_chef') friendlyName = 'Chef Hat';
         if (itemId === 'hat_crown') friendlyName = 'Crown Hat';
+        if (itemId === 'hat_magic') friendlyName = 'Magic Hat';
         if (itemId === 'trampoline_main') friendlyName = 'Bouncy Trampoline';
         // Removed friendlyName logic for level_area2
         if (itemId.startsWith('color_')) friendlyName = `${friendlyName.charAt(0).toUpperCase() + friendlyName.slice(1)} Color`;
@@ -135,7 +136,7 @@ export const StoreModal = ({ isOpen, onClose, score, ownedItems = {}, onPurchase
           {/* Basic Hat - REMOVED */}
           {/* Cowboy Hat */}
           <div style={itemCardStyle} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
-            <img src="https://play.rosebud.ai/assets/Cowboy Hat.png?KP7E" alt="Cowboy Hat" style={itemImageStyle} />
+            <img src="https://play.rosebud.ai/assets/CowboyHat.PNG?jWEr" alt="Cowboy Hat" style={itemImageStyle} />
             <span style={itemNameStyle}>Cowboy Hat</span>
             <span style={itemCostStyle}>Cost: {ITEM_COSTS.hat_cowboy} Flies</span>
              <button 
@@ -196,6 +197,19 @@ export const StoreModal = ({ isOpen, onClose, score, ownedItems = {}, onPurchase
               disabled={ownedItems['hat_crown']}
             >
               {ownedItems['hat_crown'] ? 'Owned' : 'Buy'}
+            </button>
+          </div>
+          {/* Magic Hat */}
+          <div style={itemCardStyle} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}>
+            <img src="https://play.rosebud.ai/assets/MagicHat.PNG?fJX9" alt="Magic Hat" style={itemImageStyle} />
+            <span style={itemNameStyle}>Magic Hat</span>
+            <span style={itemCostStyle}>Cost: {ITEM_COSTS.hat_magic} Flies</span>
+            <button 
+              style={ownedItems['hat_magic'] ? disabledButtonStyle : buttonStyle}
+              onClick={() => handlePurchaseAttempt('hat_magic', ITEM_COSTS.hat_magic)}
+              disabled={ownedItems['hat_magic']}
+            >
+              {ownedItems['hat_magic'] ? 'Owned' : 'Buy'}
             </button>
           </div>
           {/* Trampoline Item */}

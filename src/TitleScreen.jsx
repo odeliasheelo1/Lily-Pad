@@ -1,5 +1,5 @@
 import React from 'react';
-import bgImage from './assets/LoadScreen1.png'; // Local image
+
 
 export const TitleScreen = ({ onStartGame }) => {
   return (

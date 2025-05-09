@@ -53,7 +53,7 @@ const [isMuted, setIsMuted] = useState(() => {
   // Define trampoline position and active state early
   const trampolinePosition = useMemo(() => ({
     x: gameSize.width * 0.2,
-    y: gameSize.height * 0.6 // Moved up further from 0.7
+    y: gameSize.height * 0.4 // Moved up further from 0.5
   }), [gameSize.width, gameSize.height]);
   const isTrampolineActive = !!ownedItems.trampoline_main;
   
@@ -125,10 +125,12 @@ const [isMuted, setIsMuted] = useState(() => {
     const fixedWidth = gameSize.width;
     const fixedHeight = gameSize.height;
     // Log setup
-    const newLogWidth = fixedWidth * 0.35; // Log is 35% of game width
-    const newLogHeight = fixedHeight * 0.2; // Log is 20% of game height
-    const newLogX = fixedWidth / 2;
-    const newLogY = fixedHeight * 0.65; // Position log slightly lower than true center
+    const newLogWidth = fixedWidth * 0.40; // Log is 40% of game width (bigger)
+    const newLogHeight = fixedHeight * 0.20; // Log is 20% of game height (bigger)
+    // Position log in the bottom right corner
+    const logMargin = Math.min(fixedWidth, fixedHeight) * 0.05; // 5% margin from edges
+    const newLogX = fixedWidth - newLogWidth / 2 - logMargin + (fixedWidth * 0.08); // Move right by 2% of game width
+    const newLogY = fixedHeight - newLogHeight / 2 - logMargin - (fixedHeight * 0.08) + 40; // Adjusted vertical: less up, then down 15px (effectively lower)
     setLogSize({ width: newLogWidth, height: newLogHeight });
     setLogPosition({ x: newLogX, y: newLogY });
     // Recalculate lily pad positions whenever gameSize changes
@@ -136,38 +138,87 @@ const [isMuted, setIsMuted] = useState(() => {
     const numPads = 5; // Fixed number of lily pads
     const pondMargin = Math.min(fixedWidth, fixedHeight) * 0.05; // Reduced margin for pads
     // Define area around the log where pads should not be too close
-    const logSafeZoneRadius = Math.max(newLogWidth, newLogHeight) * 0.6; // A bit larger than half the log's largest dimension
+    // Adjust logSafeZoneRadius as log size changed
+    const logSafeZoneRadius = Math.max(newLogWidth, newLogHeight) * 0.8; // Increased safe zone due to larger log and new position
     const createLilyPad = (i, total) => {
-      let angle = (i / total) * Math.PI * 2 + (Math.random() * 0.3 - 0.15); // Increased randomness for spread
+      // Center of the game area
+      const centerX = fixedWidth / 2;
+      const centerY = fixedHeight / 2;
+      // Distribute pads in a circle around the center, with more random spread
+      let angle = (i / total) * Math.PI * 2; // Removed random angle offset
+      // Define a central area for lily pads
+      const centralAreaRadiusMax = Math.min(fixedWidth, fixedHeight) * 0.30; // Max distance from center
+      const centralAreaRadiusMin = Math.min(fixedWidth, fixedHeight) * 0.20; // Min distance from center
+      const radius = centralAreaRadiusMax; // Use a fixed radius (the maximum defined)
       
-      // Adjust radius to place pads further out, around the log
-      // Minimum radius is the log's safe zone, max is near pond edge
-      const minRadius = logSafeZoneRadius + (Math.min(fixedWidth, fixedHeight) * 0.08); // Ensure pads are beyond log + a bit
-      const maxRadiusVariation = Math.min(fixedWidth, fixedHeight) * 0.15; // How much further out they can go
-      const radius = minRadius + Math.random() * maxRadiusVariation;
-      let x = newLogX + Math.cos(angle) * radius;
-      let y = newLogY + Math.sin(angle) * radius * 0.8; // Elliptical distribution, less vertical spread
+      let x = centerX + Math.cos(angle) * radius;
+      let y = centerY + Math.sin(angle) * radius * 0.8; // Slight elliptical distribution
+      // Adjust vertical position for specific pads
+      // Pad at index 3 (when total is 5) is typically the one originating in the top-left quadrant.
+      if (i === 3 && total === 5) { 
+        y += Math.min(fixedWidth, fixedHeight) * 0.45; // Move down significantly (by 35% of the smaller game dimension)
+         
+      } else if (i === 4 && total === 5) { // Pad at index 4 (top-right quadrant origin)
+        y += Math.min(fixedWidth, fixedHeight) * 0.30; // Keep its original downward shift
+        x -= fixedWidth * 0.1;
+      }
+     
+
+      // Specific adjustments to spread "middle left" pads (indices 2 and 3 for 5 pads)
+      // These indices are the ones most likely to be in the top-left and bottom-left positions.
+      if (total === 5) { // Apply only if there are 5 pads as assumed by these indices
+        if (i === 2) { // Pad that's typically top-left
+          x -= fixedWidth * 0.1; // Push 2.5% of game width further to the left
+        } else if (i === 3) { // Pad that's typically bottom-left (before its main y-shift)
+          x += fixedWidth * 0.1; // Push 2.5% of game width towards the center (making it less extremely left)
+        }
+        else if (i === 0) { // Pad that's typically bottom-left (before its main y-shift)
+          x += fixedWidth * -0.1; // Push 2.5% of game width towards the center (making it less extremely left)
+         y += Math.min(fixedWidth, fixedHeight) * 0.10;
+        }
+      }
       // Ensure pads are within pond boundaries
-      const padSize = Math.min(fixedWidth, fixedHeight) * 0.1; // Slightly smaller pads
+      const padSize = Math.min(fixedWidth, fixedHeight) * 0.09; // Slightly smaller pads
+      
       // Clamp positions to be within pond margins
-      // For y-coordinate, ensure it's not too close to the top: increase the minimum y
-      const minY = pondMargin + padSize / 2 + (fixedHeight * 0.25); // Add 25% of game height as additional top margin
-      x = Math.max(pondMargin + padSize / 2, Math.min(fixedWidth - pondMargin - padSize / 2, x));
-      y = Math.max(minY, Math.min(fixedHeight - pondMargin - padSize / 2, y)); // Use minY for the lower bound
+      const minPadX = pondMargin + padSize / 2;
+      const maxPadX = fixedWidth - pondMargin - padSize / 2;
+      const minPadY = pondMargin + padSize / 2; // Remove the extra top margin for y
+      const maxPadY = fixedHeight - pondMargin - padSize / 2;
+      x = Math.max(minPadX, Math.min(maxPadX, x));
+      y = Math.max(minPadY, Math.min(maxPadY, y));
       
-      // Ensure pads don't overlap significantly with the log's central area
-      // This is a simplified check, more robust collision detection could be added
-      const dx = x - newLogX;
-      const dy = y - newLogY;
-      const distanceFromLogCenter = Math.sqrt(dx*dx + dy*dy);
-      
-      if (distanceFromLogCenter < logSafeZoneRadius * 0.8) { // If too close to log center, try to push it out
-          const pushFactor = (logSafeZoneRadius * 0.8 - distanceFromLogCenter) / distanceFromLogCenter;
-          x += dx * pushFactor * 0.5; // Push gently
-          y += dy * pushFactor * 0.5;
-          // Re-clamp
-          x = Math.max(pondMargin + padSize / 2, Math.min(fixedWidth - pondMargin - padSize / 2, x));
-          y = Math.max(pondMargin + padSize / 2, Math.min(fixedHeight - pondMargin - padSize / 2, y));
+      // Simplified proximity check: if a pad ends up too close to the log's bounding box, nudge it.
+      // This is less about circular distance and more about not overlapping the log's rectangle.
+      const logRect = {
+        left: newLogX - newLogWidth / 2,
+        right: newLogX + newLogWidth / 2,
+        top: newLogY - newLogHeight / 2,
+        bottom: newLogY + newLogHeight / 2,
+      };
+      const padRect = {
+        left: x - padSize / 2,
+        right: x + padSize / 2,
+        top: y - padSize / 2,
+        bottom: y + padSize / 2,
+      };
+      // Nudge if overlapping log, primarily pushing away from log center
+      if (!(padRect.right < logRect.left || 
+            padRect.left > logRect.right || 
+            padRect.bottom < logRect.top || 
+            padRect.top > logRect.bottom)) {
+        
+        const dxFromLog = x - newLogX;
+        const dyFromLog = y - newLogY;
+        const distFromLog = Math.sqrt(dxFromLog * dxFromLog + dyFromLog * dyFromLog);
+        if (distFromLog > 0) { // Avoid division by zero
+            const nudgeFactor = (logSafeZoneRadius * 0.9 - distFromLog) / distFromLog;
+            x += dxFromLog * nudgeFactor * 0.8; // Increased nudge strength
+            y += dyFromLog * nudgeFactor * 0.8; // Increased nudge strength
+            // Re-clamp
+            x = Math.max(minPadX, Math.min(maxPadX, x));
+            y = Math.max(minPadY, Math.min(maxPadY, y));
+        }
       }
       return {
         id: pads.length,
@@ -470,6 +521,7 @@ const [isMuted, setIsMuted] = useState(() => {
             height: logSize.height, // Style height
             zIndex: 5,
             cursor: 'pointer',
+            transform: 'rotate(-5deg)', // Added a 5-degree tilt
             // canvas width/height attributes are set in useEffect
           }}
           // Accessibility: Provide an ARIA label if appropriate, though it's a visual element.
@@ -541,7 +593,7 @@ const [isMuted, setIsMuted] = useState(() => {
           style={{
             position: 'absolute',
             left: `${gameSize.width * 0.2 - 60}px`, // Center of trampoline at 20% width, 60 is half of 120px size
-            top: `${gameSize.height * 0.6 - 60}px`, // Adjusted to match new Y center (0.6)
+            top: `${gameSize.height * 0.4 - 60}px`, // Adjusted to match new Y center (0.4)
             width: '120px',
             height: '120px',
             cursor: 'pointer',
